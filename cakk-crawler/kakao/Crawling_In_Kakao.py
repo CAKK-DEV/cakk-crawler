@@ -26,7 +26,7 @@ def crawling_cake_shop(driver):
                 store_html = p.get_attribute('innerHTML')
                 store_info = BeautifulSoup(store_html, "html.parser")
                 name = store_info.select('div.head_item.clickArea > strong > a.link_name')[0].text.strip()
-                addr1 = store_info.select('div.info_item > div.addr > p')[0].text.splitlines()[1].strip()
+                addr1 = store_info.select('div.info_item > div.addr > p')[0].text.splitlines()[0].strip()
                 addr2 = store_info.select('div.info_item > div.addr > p.lot_number')[0].text.strip()
                 addr_list = [addr1, addr2]
                 cake_shops[name] = addr_list
