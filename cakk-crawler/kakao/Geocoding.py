@@ -17,7 +17,7 @@ def get_lat_lng(address, API_KEY):
 
     if result['documents']:
         match_first = result['documents'][0]['address']
-        return {"lat": str(match_first['x']), "lng": str(match_first['y'])}
+        return {"longitude": str(match_first['x']), "latitude": str(match_first['y'])}
     else:
         return dict()
 
@@ -30,8 +30,8 @@ def add_lat_with_lon(API_KEY):
     for name, address in zip(cake_shops['name'], cake_shops['addr1']):
         latlng = get_lat_lng(address, API_KEY)
         if latlng:
-            lat = latlng['lat']
-            lng = latlng['lng']
+            lat = latlng['latitude']
+            lng = latlng['longitude']
             lat_list.append(lat)
             lng_list.append(lng)
         else:
@@ -39,7 +39,7 @@ def add_lat_with_lon(API_KEY):
             lng_list.append(None)
 
     # pd.Series와 Concat을 이용하여 행을 추가하고 csv파일로 저장
-    sr1 = pd.Series(lat_list, name='lat')
-    sr2 = pd.Series(lng_list, name='lng')
+    sr1 = pd.Series(lat_list, name='latitude')
+    sr2 = pd.Series(lng_list, name='longitude')
     datas = pd.concat([cake_shops, sr1, sr2], axis=1)
     datas.to_csv('kakao_map_latLng.csv', index=False)

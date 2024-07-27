@@ -25,10 +25,10 @@ def setting_with_keyword(keyword):
 
     # 검색실행
     driver.find_element(By.CLASS_NAME, 'go.ico_search.btn_search.active').click()
-    time.sleep(5)
+    time.sleep(2)
 
     # 장소 더보기(많은 장소들을 불러오기 위함)
     driver.find_element(By.ID, 'info.search.place.more').click()
-    time.sleep(5)
+    time.sleep(2)
 
     return driver

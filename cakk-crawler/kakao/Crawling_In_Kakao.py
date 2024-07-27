@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
-from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
+import time
 
 
 def crawling_cake_shop(driver):
@@ -8,16 +8,21 @@ def crawling_cake_shop(driver):
     cake_shops = dict()
 
     page = 1  # 현재 크롤링하는 페이지가 전체에서 몇 번째 페이지인지
-    cur_page = 0  # 1 ~ 5개 패에지 중 몇 번째인지
+    cur_page = 0  # 1 ~ 5개 페이지 중 몇 번째인지
     error_cnt = 0
 
     # while문으로 page 차례대로 설정
-    while 1:
+    while True:
         try:
             cur_page += 1
             print("**", page, "**")
 
-            driver.find_element(By.XPATH, f'//*[@id="info.search.page.no{cur_page}"]').send_keys(Keys.ENTER)
+            # 페이지 번호 버튼 클릭
+            page_button = driver.find_element(By.XPATH, f'//*[@id="info.search.page.no{cur_page}"]')
+            driver.execute_script("arguments[0].click();", page_button)  # 클릭 대신 자바스크립트로 클릭
+
+            # 잠시 대기 (페이지 로딩 대기)
+            time.sleep(2)
 
             place_lists = driver.find_elements(By.CLASS_NAME, 'PlaceItem.clickArea')
 
@@ -25,9 +30,9 @@ def crawling_cake_shop(driver):
             for p in place_lists:
                 store_html = p.get_attribute('innerHTML')
                 store_info = BeautifulSoup(store_html, "html.parser")
-                name = store_info.select('div.head_item.clickArea > strong > a.link_name')[0].text.strip()
-                addr1 = store_info.select('div.info_item > div.addr > p')[0].text.splitlines()[0].strip()
-                addr2 = store_info.select('div.info_item > div.addr > p.lot_number')[0].text.strip()
+                name = store_info.select_one('div.head_item.clickArea > strong > a.link_name').text.strip()
+                addr1 = store_info.select_one('div.info_item > div.addr > p').text.splitlines()[0].strip()
+                addr2 = store_info.select_one('div.info_item > div.addr > p.lot_number').text.strip()
                 addr_list = [addr1, addr2]
                 cake_shops[name] = addr_list
 
@@ -37,13 +42,15 @@ def crawling_cake_shop(driver):
             # 한 페이지에 장소 개수가 15개 미만이라면 해당 페이지는 마지막 페이지
             if len(cake_shop_list) < 15:
                 break
+
             # 다음 버튼을 누를 수 없다면 마지막 페이지
-            if not driver.find_element(By.XPATH, '//*[@id="info.search.page.next"]').is_enabled():
+            next_button = driver.find_element(By.XPATH, '//*[@id="info.search.page.next"]')
+            if not next_button.is_enabled():
                 break
 
             # (8) 다섯번째 페이지까지 왔다면 다음 버튼을 누르고 cur_page = 0으로 초기화
             if cur_page % 5 == 0:
-                driver.find_element(By.XPATH, '//*[@id="info.search.page.next"]').send_keys(Keys.ENTER)
+                driver.execute_script("arguments[0].click();", next_button)
                 cur_page = 0
 
             page += 1
